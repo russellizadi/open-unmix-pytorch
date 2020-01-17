@@ -1,0 +1,12 @@
+numpy
+matplotlib
+torch
+scipy
+scikit-learn
+resampy
+tqdm
+ffmpeg
+musdb
+museval
+norbert
+gitpython
