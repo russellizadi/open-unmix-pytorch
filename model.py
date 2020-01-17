@@ -237,5 +237,7 @@ class OpenUnmix(nn.Module):
 
         # since our output is non-negative, we can apply RELU
         x = F.relu(x) * mix
-
+        
+        # output must be less than mix
+        x = torch.min(x, mix)
         return x
