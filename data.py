@@ -773,6 +773,8 @@ class MUSDBDataset(torch.utils.data.Dataset):
 
                 # set the excerpt duration
                 track.chunk_duration = self.seq_duration
+                
+                energy = 0
                 # set random start position
                 track.chunk_start = random.uniform(
                     0, track.duration - self.seq_duration
