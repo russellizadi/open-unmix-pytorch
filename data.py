@@ -775,15 +775,18 @@ class MUSDBDataset(torch.utils.data.Dataset):
                 track.chunk_duration = self.seq_duration
                 
                 energy = 0
-                # set random start position
-                track.chunk_start = random.uniform(
-                    0, track.duration - self.seq_duration
-                )
-                # load source audio and apply time domain source_augmentations
-                audio = torch.tensor(
-                    track.sources[source].audio.T,
-                    dtype=self.dtype
-                )
+                while energy < 0.001:
+                    # set random start position
+                    track.chunk_start = random.uniform(
+                        0, track.duration - self.seq_duration
+                    )
+                    # load source audio and apply time domain source_augmentations
+                    audio = torch.tensor(
+                        track.sources[source].audio.T,
+                        dtype=self.dtype
+                    )
+                    energy = torch.sqrt(torch.mean(torch.abs(audio)**2))
+
                 audio = self.source_augmentations(audio)
                 audio_sources.append(audio)
 
