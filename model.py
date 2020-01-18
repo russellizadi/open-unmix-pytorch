@@ -195,10 +195,11 @@ class OpenUnmix(nn.Module):
         nb_frames, nb_samples, nb_channels, nb_bins = x.data.shape
 
         mix = x.detach().clone()
+        mix_ = x
 
         # crop
         x = x[..., :self.nb_bins]
-
+        
         # shift and scale input to mean=0 std=1 (across all bins)
         x += self.input_mean
         x *= self.input_scale
@@ -237,5 +238,7 @@ class OpenUnmix(nn.Module):
 
         # since our output is non-negative, we can apply RELU
         x = F.relu(x) * mix
-
+        
+        # output must be less than mix
+        x = torch.min(x, mix_)
         return x
