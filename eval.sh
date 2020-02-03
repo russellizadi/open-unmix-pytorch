@@ -1,22 +1,20 @@
 #!/bin/bash
 
 # choose the cuda id
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 echo CUDA ID: $CUDA_VISIBLE_DEVICES
 
 # set args
 path_datasets="/home/russell/russellizadi/datasets"
 dataset="musdb"
-name_dataset="musdb18_debug"
-epochs="1"
+name_dataset="musdb18_wav"
 targets="vocals"
 #targets="vocals drums bass other"
-samples_per_track="64"
 is_wav="--is-wav"
 
 # don't change
-tag_model="${dataset}_${name_dataset}_${epochs}"
-
+tag_model="musdb_musdb18_wav_1002"
+#tag_model="umx_101"
 # eval
 root="${path_datasets}/${dataset}/${name_dataset}"
 output="models/${tag_model}"

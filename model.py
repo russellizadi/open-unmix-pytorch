@@ -187,11 +187,16 @@ class OpenUnmix(nn.Module):
             torch.ones(self.nb_output_bins).float()
         )
 
-    def forward(self, x):
+    def forward(self, x, y=None):
         # check for waveform or spectrogram
         # transform to spectrogram if (nb_samples, nb_channels, nb_timesteps)
         # and reduce feature dimensions, therefore we reshape
+        if y is not None:
+            x = torch.cat((x, y), dim=0)
+            #print(x.shape, y.shape)
+            #print(xy.shape)
         x = self.transform(x)
+        
         nb_frames, nb_samples, nb_channels, nb_bins = x.data.shape
 
         mix = x.detach().clone()
@@ -211,10 +216,12 @@ class OpenUnmix(nn.Module):
         x = x.reshape(nb_frames, nb_samples, self.hidden_size)
         # squash range ot [-1, 1]
         x = torch.tanh(x)
-
+        
         # apply 3-layers of stacked LSTM
         lstm_out = self.lstm(x)
-
+        
+        h = lstm_out[0]
+        #print(h.shape, h.min(), h.max())
         # lstm skip connection
         x = torch.cat([x, lstm_out[0]], -1)
 
@@ -237,5 +244,6 @@ class OpenUnmix(nn.Module):
 
         # since our output is non-negative, we can apply RELU
         x = F.relu(x) * mix
-
+        if y is not None:
+            return x, h
         return x

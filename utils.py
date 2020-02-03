@@ -2,7 +2,9 @@ import shutil
 import torch
 import os
 import numpy as np
-
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
 
 def _sndfile_available():
     try:
@@ -190,3 +192,65 @@ class EarlyStopping(object):
             self.is_better = lambda a, best: a < best - min_delta
         if mode == 'max':
             self.is_better = lambda a, best: a > best + min_delta
+
+def normalize(x):
+    return x/x.max()
+
+def set_args():
+    args = lambda: None
+    args.fig_ratio = 1 # in latex
+    args.clb_pad = .01
+    args.clb_shrink = .85
+    args.clb_fraction = .1 # change this
+    args.font_size = 10
+    args.samplerate = 44100
+    args.path_fig = 'tmp/fig.pdf'
+    args.fig_pad = .01
+    args.fig_shrink = .5
+    args.fig_fraction = 0.05
+    return args
+
+def plot_spc(x, args):
+    len_x, dim_x = x.shape
+
+    cfg_fig = {
+        # Use LaTeX to write all text
+        "text.usetex": True,
+        "font.family": "serif",
+        # Use 10pt font in plots, to match 10pt font in document
+        "axes.labelsize": args.font_size,
+        "font.size": args.font_size,
+        "font.serif": 'Times',
+        "legend.fontsize": args.font_size,
+        "xtick.labelsize": args.font_size,
+        "ytick.labelsize": args.font_size
+    }
+    mpl.rcParams.update(cfg_fig)
+
+    len_fig = 345/72.27 # textwidth pt to inch
+    len_fig *= (args.fig_ratio) # fraction in latex
+    fig, axes = plt.subplots(1, 1, figsize=(len_fig*1.3, len_fig))
+
+    im = axes.imshow(x, origin='lower', cmap=cm.Blues)
+
+    cb = fig.colorbar(im, pad=args.fig_pad, shrink=args.fig_shrink, fraction=args.fig_fraction)
+    cb.outline.set_visible(False)
+    axb = cb.ax
+
+    axb.set_xlabel("{0:.0f}".format(np.min(x)))
+    axt = axb.twiny()
+
+    axt.set_xlabel("{0:.0f}".format(np.max(x)))
+    axt.xaxis.set_ticks([])
+    axt.yaxis.set_ticks([])
+
+    axt.spines['top'].set_visible(False)
+    axt.spines['bottom'].set_visible(False)
+    axt.spines['right'].set_visible(False)
+    axt.spines['left'].set_visible(False)
+
+    axes.tick_params(axis='both', which='both', length=0, direction='in')
+    
+    if hasattr(args, 'path_fig'):
+        fig.savefig(args.path_fig, bbox_inches='tight')
+    plt.close()

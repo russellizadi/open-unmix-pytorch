@@ -13,7 +13,7 @@ import random
 from git import Repo
 import os
 import copy
-
+import utils as ut
 
 tqdm.monitor_interval = 0
 
@@ -26,9 +26,26 @@ def train(args, unmix, device, train_sampler, optimizer):
         pbar.set_description("Training batch")
         x, y = x.to(device), y.to(device)
         optimizer.zero_grad()
-        Y_hat = unmix(x)
+        # the model takes target too 
+        Y_hat, H_hat_H = unmix(x, y)
+        Y_hat, _ = torch.chunk(Y_hat, 2, dim=1)
+        H_hat, H = torch.chunk(H_hat_H, 2, dim=1)
+        #print("Y_hat", Y_hat.shape)
+        #print("H_hat", H_hat.shape)
         Y = unmix.transform(y)
+        #print("Y", Y.shape)
+        #print(Y.min(), Y.max())
+        #print(Y.shape)
+        #print(Y.mean(), Y.std())
+        spc = Y[:, 0, 0, :].cpu().numpy().T
+        args = ut.set_args()
+        ut.plot_spc(spc, args)
+        p1 = ut.normalize(spc)
+        args.path_fig = "tmp/p1.pdf"
+        ut.plot_spc(p1, args)
         loss = torch.nn.functional.mse_loss(Y_hat, Y)
+        # new loss
+        loss += .1 * torch.nn.functional.mse_loss(H_hat, H.data)
         loss.backward()
         optimizer.step()
         losses.update(loss.item(), Y.size(1))

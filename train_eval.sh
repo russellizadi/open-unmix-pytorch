@@ -8,10 +8,10 @@ echo CUDA ID: $CUDA_VISIBLE_DEVICES
 path_datasets="/home/russell/russellizadi/datasets"
 dataset="musdb"
 name_dataset="musdb18_debug"
-epochs="1"
+epochs="1000"
 targets="vocals"
 #targets="vocals drums bass other"
-samples_per_track="64"
+samples_per_track="256"
 is_wav="--is-wav"
 
 # don't change
@@ -22,7 +22,14 @@ root="${path_datasets}/${dataset}/${name_dataset}"
 output="models/${tag_model}"
 
 for target in ${targets}; do
-	python train.py --dataset ${dataset} --root=${root} --epochs ${epochs} --output=${output} --samples-per-track ${samples_per_track} --target=${target} --is-wav
+	python train.py \
+		--dataset ${dataset} \
+		--root=${root} \
+		--epochs ${epochs} \
+		--output=${output} \
+		--samples-per-track ${samples_per_track} \
+		--target=${target} \
+		--is-wav
 done
 
 # eval
@@ -32,4 +39,11 @@ evaldir="evals/$tag_model/$name_dataset"
 subset="test"
 targets=$targets
 
-python eval.py --model ${model} --targets ${targets} --root ${root} --subset $subset --outdir $outdir --evaldir $evaldir --is-wav 
+python eval.py \
+	--model ${model} \
+	--targets ${targets} \
+	--root ${root} \
+	--subset $subset \
+	--outdir $outdir \
+	--evaldir $evaldir \
+	--is-wav 
